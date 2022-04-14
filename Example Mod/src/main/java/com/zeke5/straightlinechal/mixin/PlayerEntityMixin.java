@@ -24,6 +24,21 @@ public abstract class PlayerEntityMixin implements IPlayerEntity {
         StraightLineChallenge.LOGGER.info("Straight line Coords set to (" + this.lineX + ", " + this.lineZ + ")");
     }
 
+    public int[] getNearestLinePosition(BlockPos blockPos) {
+        int xPos = blockPos.getX();
+        int yPos = blockPos.getY();
+        int zPos = blockPos.getZ();
+
+        if (Math.abs(xPos - this.lineX) <= Math.abs(zPos - this.lineZ)) {
+            xPos = this.lineX;
+        }
+        else {
+            zPos = this.lineZ;
+        }
+
+        return new int [] {xPos, yPos, zPos};
+    }
+
 
     @Invoker("damage")
     public abstract boolean invokeDamage(DamageSource source, float amount);

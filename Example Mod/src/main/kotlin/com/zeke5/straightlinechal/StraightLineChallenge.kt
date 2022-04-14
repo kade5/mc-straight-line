@@ -1,4 +1,6 @@
 package com.zeke5.straightlinechal
+import com.zeke5.straightlinechal.callbacks.PlayerConnectedCallback
+import com.zeke5.straightlinechal.event.ModPlayerConnectedEvent
 import com.zeke5.straightlinechal.event.ModPlayerRespawnEvent
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
@@ -7,6 +9,8 @@ import org.slf4j.LoggerFactory
 
 @Suppress("UNUSED")
 object StraightLineChallenge: ModInitializer {
+
+
 
     const val MOD_ID = "straightlinechal"
     @JvmField
@@ -18,7 +22,7 @@ object StraightLineChallenge: ModInitializer {
     }
 
     private fun registerEvents() {
-        val respawnEvent = ModPlayerRespawnEvent()
-        ServerPlayerEvents.AFTER_RESPAWN.register(respawnEvent)
+        ServerPlayerEvents.AFTER_RESPAWN.register(ModPlayerRespawnEvent())
+        PlayerConnectedCallback.EVENT.register(ModPlayerConnectedEvent())
     }
 }
