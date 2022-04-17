@@ -7,11 +7,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 
 
-public interface PlayerConnectedCallback {
-    Event<PlayerConnectedCallback> EVENT = EventFactory.createArrayBacked(PlayerConnectedCallback.class, (listeners)
+public interface PlayerChangeDimensionCallback {
+    Event<PlayerChangeDimensionCallback> EVENT = EventFactory.createArrayBacked(PlayerChangeDimensionCallback.class, (listeners)
             -> (player, server) -> {
-        for (PlayerConnectedCallback listener : listeners) {
-            ActionResult result = listener.playerConnected(player, server);
+        for (PlayerChangeDimensionCallback listener : listeners) {
+            ActionResult result = listener.playerChangeDimension(player, server);
 
             if (result != ActionResult.PASS) {
                 return result;
@@ -21,5 +21,5 @@ public interface PlayerConnectedCallback {
         return ActionResult.PASS;
     });
 
-    ActionResult playerConnected(ServerPlayerEntity player, ServerWorld server);
+    ActionResult playerChangeDimension(ServerPlayerEntity player, ServerWorld server);
 }

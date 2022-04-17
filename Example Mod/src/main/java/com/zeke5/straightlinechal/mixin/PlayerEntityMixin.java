@@ -2,10 +2,13 @@ package com.zeke5.straightlinechal.mixin;
 
 import com.zeke5.straightlinechal.StraightLineChallenge;
 import com.zeke5.straightlinechal.util.IPlayerEntity;
+import com.zeke5.straightlinechal.util.ModUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,29 +17,53 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin implements IPlayerEntity {
-    private int lineX = 0;
-    private int lineZ = 0;
-    private float outOfLineDamage = 0.5f;
 
-    public void setLineCords(BlockPos blockPos) {
-        this.lineX = blockPos.getX();
-        this.lineZ = blockPos.getZ();
-        StraightLineChallenge.LOGGER.info("Straight line Coords set to (" + this.lineX + ", " + this.lineZ + ")");
+    public int getLineX() {
+        PlayerEntity thisPlayer = (PlayerEntity)(Object)this;
+        return ((WorldMixin) thisPlayer.world).getProperties().getSpawnX();
+    }
+
+    public int getLineY() {
+        PlayerEntity thisPlayer = (PlayerEntity)(Object)this;
+        return ((WorldMixin) thisPlayer.world).getProperties().getSpawnY();
+    }
+
+    public int getLineZ() {
+        PlayerEntity thisPlayer = (PlayerEntity)(Object)this;
+        return ((WorldMixin) thisPlayer.world).getProperties().getSpawnZ();
     }
 
     public int[] getNearestLinePosition(BlockPos blockPos) {
-        int xPos = blockPos.getX();
-        int yPos = blockPos.getY();
-        int zPos = blockPos.getZ();
 
-        if (Math.abs(xPos - this.lineX) <= Math.abs(zPos - this.lineZ)) {
-            xPos = this.lineX;
+        int posX = blockPos.getX();
+        int posY = blockPos.getY();
+        int posZ = blockPos.getZ();
+
+        if (Math.abs(posX - this.getLineX()) <= Math.abs(posZ - this.getLineZ())) {
+            posX = this.getLineX();
         }
         else {
-            zPos = this.lineZ;
+            posZ = this.getLineZ();
         }
 
-        return new int [] {xPos, yPos, zPos};
+        return new int [] {posX, posY, posZ};
+    }
+
+    public void doLineDamage() {
+        Entity thisPlayer = (Entity)(Object) this;
+        int[] linePosition = {this.getLineX(), this.getLineZ()};
+        if (thisPlayer.getWorld().getRegistryKey() == World.OVERWORLD) {
+            if (thisPlayer.getBlockX() != linePosition[0] && thisPlayer.getBlockZ() != linePosition[1] && thisPlayer.isAlive()) {
+                this.invokeDamage(DamageSource.OUT_OF_WORLD, ModUtils.Factory.getOutOfLineDamage());
+                StraightLineChallenge.LOGGER.debug("Player is taking damage");
+            }
+        } else if (thisPlayer.getWorld().getRegistryKey() == World.NETHER) {
+            linePosition = ModUtils.Factory.convertToNetherCoords(linePosition);
+            if (thisPlayer.getBlockX() != linePosition[0] && thisPlayer.getBlockZ() != linePosition[1] && thisPlayer.isAlive()) {
+                this.invokeDamage(DamageSource.OUT_OF_WORLD, ModUtils.Factory.getOutOfLineDamage());
+                StraightLineChallenge.LOGGER.debug("Player is taking damage");
+            }
+        }
     }
 
 
@@ -45,11 +72,7 @@ public abstract class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "tick()V", at = @At("HEAD"))
     private void injectTick(CallbackInfo info) {
-        Entity thisPlayer = (Entity)(Object) this;
-        if (thisPlayer.getBlockX() != this.lineX && thisPlayer.getBlockZ() != this.lineZ && thisPlayer.isAlive()) {
-            this.invokeDamage(DamageSource.OUT_OF_WORLD, this.outOfLineDamage);
-            StraightLineChallenge.LOGGER.debug("Player is taking damage");
-        }
+        //doLineDamage();
     }
 
 
