@@ -13,7 +13,7 @@ import net.minecraft.util.ActionResult
 import net.minecraft.world.World
 
 class ModPlayerChangeDimensionEvent : PlayerChangeDimensionCallback{
-    override fun playerChangeDimension(player: ServerPlayerEntity?, server: ServerWorld?): ActionResult {
+    override fun playerChangeDimension(player: ServerPlayerEntity, server: ServerWorld): ActionResult {
         /*if (player != null && server != null) {
             var spawnPos = intArrayOf(server.spawnPos.x, server.spawnPos.y)
             val iPlayer = player as IPlayerEntity

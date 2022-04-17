@@ -2,6 +2,7 @@ package com.zeke5.straightlinechal.event
 
 import com.zeke5.straightlinechal.StraightLineChallenge
 import com.zeke5.straightlinechal.callbacks.PlayerConnectedCallback
+import com.zeke5.straightlinechal.manager.StraightLineManager
 import com.zeke5.straightlinechal.mixin.WorldMixin
 import com.zeke5.straightlinechal.util.IPlayerEntity
 import com.zeke5.straightlinechal.util.ModUtils
@@ -27,9 +28,8 @@ class ModPlayerRespawnEvent : ServerPlayerEvents.AfterRespawn{
 }
 
 class ModPlayerConnectedEvent : PlayerConnectedCallback {
-    override fun playerConnected(player: ServerPlayerEntity?, server: ServerWorld?): ActionResult {
+    override fun playerConnected(player: ServerPlayerEntity, server: ServerWorld): ActionResult {
 
-        if (server != null && player != null) {
             val iPlayer: IPlayerEntity =  player as IPlayerEntity
 
             val validPos = iPlayer.getNearestLinePosition(player.blockPos)
@@ -37,9 +37,22 @@ class ModPlayerConnectedEvent : PlayerConnectedCallback {
                 player.requestTeleport(validPos[0].toDouble(), validPos[1].toDouble(), validPos[2].toDouble())
                 StraightLineChallenge.LOGGER.info("Teleported to (${validPos[0]}, ${validPos[1]}, ${validPos[2]}) after connected")
                 StraightLineChallenge.LOGGER.info("Straight Line position is ${iPlayer.getLineX()}, ${iPlayer.getLineZ()}")
+                setLine(server)
                 return ActionResult.PASS
             }
-        }
         return ActionResult.FAIL
+    }
+
+    fun setLine(world: ServerWorld) {
+        if (!StraightLineManager.INSTANCE.getIsOverworldLineSet()) {
+            val lineX = world.spawnPos.x
+            val lineZ = world.spawnPos.z
+            StraightLineManager.INSTANCE.setOverworldLine(intArrayOf(lineX, lineZ))
+            StraightLineManager.INSTANCE.setIsOverworldLineSet(true)
+            StraightLineChallenge.LOGGER.info("Real Line Position set to ($lineX, $lineZ)")
+        } else {
+            StraightLineChallenge.LOGGER.info("Real Line Position was already loaded")
+        }
+
     }
 }
