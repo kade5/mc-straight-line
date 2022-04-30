@@ -14,7 +14,9 @@ class ModServerLoadEvent : ServerWorldEvents.Load {
             StraightLineManager.INSTANCE = (world.persistentStateManager.getOrCreate({nbt: NbtCompound ->
                 StraightLineManager.readNbt(nbt)}, {StraightLineManager()}, "straight_line_challenge")) as StraightLineManager
 
-            setLine(world)
+            StraightLineChallenge.LOGGER.info("Line persistent state has been loaded or created")
+
+            //setLine(world)
         }
     }
 

@@ -7,7 +7,6 @@ import net.minecraft.world.MutableWorldProperties
 class ModUtils {
     companion object Factory {
         val NETHER_SIZE = 8
-        val lineDataKey = "straightlinechal.line_date"
         val outOfLineDamage = 0.5f
 
         fun convertToNetherCoords(coords: IntArray): IntArray {
